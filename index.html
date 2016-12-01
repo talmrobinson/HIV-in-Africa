@@ -157,7 +157,7 @@ g.call(xAxis).append("text")
 var tooltip = d3.select('body').append('div')
             .attr('class', 'hidden tooltip');
   
-d3.json("hiv.json", function(error, hiv) {
+d3.json("https://raw.githubusercontent.com/talmrobinson/HIVSSA2011/master/hiv.json", function(error, hiv) {
   if (error) throw error;
   console.log(hiv);
 
