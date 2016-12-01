@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+svg {
+  display: block;
+  margin: auto;
+  font: 10px sans-serif;
+}
+
+.caption {
+  font-weight: bold;
+  text-align: center;
+}
+
+.key path {
+  display: none;
+}
+
+.key line {
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+  
+.country {
+  stroke: #899;
+  stroke-opacity: .9;
+}
+  
+.title {
+  font: 36px sans-serif;
+  font-weight: bold;
+  text-align: center;
+}
+
+.bar {
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.story {
+  font: 12px sans-serif;
+  text-align: center;
+
+}
+  
+.footer {
+font: 12px sans-serif;
+}
+  
+.buttons {
+  font: 16px sans-serif;
+  float:left;
+}
+  
+.tooltip {
+  position: absolute;
+  width: auto;
+  height: auto;
+  padding: 10px;
+  margin-top: 30px;
+  background-color: rgba(255, 255, 255, 0.7);
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  pointer-events: none;
+  font-weight: bold;
+  font: 16px sans-serif;
+  opacity: 1 !important;
+}
+
+</style>
+<body>
+  <div class=title>HIV Rates in Sub-Saharan Africa, 2011</div>
+  <hr class="bar" width="720">
+  <div class="story">Despite an overall decrease of HIV infection in the region, Southern Africa still suffers from high infection rates.</div>
+  <div id="mySVG"></div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xs-4 col-xs-offset-4 " >
+        <button type="button" class="btn btn-success">% of Pop With HIV</button> 
+        <button type="button" class="btn btn-primary">Deaths (% of Pop.)</button>
+    </div>
+  </div>
+  
+  <div class="footer">
+    Tal Robison<br>
+    CMPS 165: Data programming for Visualization<br>
+    Fall 2016<br>
+    Instructor: Suresh Lodha<br>
+    Sources: <a href="https://www.arcgis.com/home/item.html?id=16da193d9bcd4ae0b74febe39730658a">Africa SHP file</a> <a href="https://africaopendata.org/dataset/avert-hiv-and-aids-statistics">HIV dataset</a> 
+    <a href="http://bl.ocks.org/mbostock/1087001">ToolTip Help</a> <a href="https://bl.ocks.org/john-guerra/43c7656821069d00dcbc">GeoJSON Help</a>
+  </div>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  
+<script>
+
+var colorSet = ["#f7fcf5","#e5f5e0","#c7e9c0","#a1d99b","#74c476","#41ab5d","#238b45","#006d2c","#00441b"];
+  
+var state = 0;
+var width = 720,
+    height = 600;
+
+var formatNumber = d3.format(",d");
+
+var path = d3.geo.path()
+    .projection(null);
+
+var color = d3.scale.threshold()
+    .domain([1, 2, 4, 6, 8, 12, 16, 25])
+    .range(colorSet);
+
+// A position encoding for the key only.
+var x = d3.scale.linear()
+    .domain([0, 26])
+    .range([-100, 200]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom")
+    .tickSize(13)
+    .tickValues(color.domain())
+    .tickFormat(function(d) { return d >= 1 ? formatNumber(d) : null; });
+
+var svg = d3.select("#mySVG").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var g = svg.append("g")
+    .attr("class", "key")
+    .attr("transform", "translate(440,40)");
+
+g.selectAll("rect")
+    .data(color.range().map(function(d, i) {
+      return {
+        x0: i ? x(color.domain()[i - 1]) : x.range()[0],
+        x1: i < color.domain().length ? x(color.domain()[i]) : x.range()[1],
+        z: d
+      };
+    }))
+  .enter().append("rect")
+    .attr("height", 8)
+    .attr("x", function(d) { return d.x0; })
+    .attr("width", function(d) { return d.x1 - d.x0; })
+    .style("fill", function(d) { return d.z; });
+
+g.call(xAxis).append("text")
+    .attr("class", "caption")
+    .attr("y", -6)
+    .text("Percentage of Adults (15-49) with HIV");
+
+  //tooltip object
+var tooltip = d3.select('body').append('div')
+            .attr('class', 'hidden tooltip');
+  
+d3.json("hiv.json", function(error, hiv) {
+  if (error) throw error;
+  console.log(hiv);
+
+  var countries = topojson.feature(hiv, hiv.objects.Countries);
+
+  // this code is a modified version of code by John Alexis Guerra Gómez
+  // https://bl.ocks.org/john-guerra/43c7656821069d00dcbc
+  svg.append("g")
+  .attr("class", "country")
+  .selectAll('path')
+  .data(countries.features)
+.enter().append('path')
+  .attr('d', path)
+  .attr('vector-effect', 'non-scaling-stroke')
+  .style('fill', function(d) {return color(d.properties.percent);})
+  // tooltip
+  .on("mouseover", mouseover)
+    .on("mousemove", function(d) {
+   div.text(d.id + " %" + d.properties.percent)
+      .style("left", (d3.event.pageX - 34) + "px")
+      .style("top", (d3.event.pageY - 12) + "px");})
+    .on("mouseout", mouseout);
+});
+
+d3.select(self.frameElement).style("height", height + "px");
+
+// this code is a modified version of code by Mike Bostock
+// http://bl.ocks.org/mbostock/1087001
+var div = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("display", "none");  
+function mouseover() {
+  div.style("display", "inline");
+}
+function mouseout() {
+  div.style("display", "none");
+}
+</script>
+<body>
