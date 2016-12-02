@@ -44,10 +44,6 @@ svg {
 
 }
   
-.footer {
-font: 12px sans-serif;
-}
-  
 .buttons {
   font: 16px sans-serif;
   float:left;
@@ -80,19 +76,30 @@ font: 12px sans-serif;
       <div class="col-xs-4 col-xs-offset-4 " >
         <button type="button" class="btn btn-success">% of Pop With HIV</button> 
         <button type="button" class="btn btn-primary">Deaths (% of Pop.)</button>
+      </div>
     </div>
   </div>
-  
-  <div class="footer">
-    Tal Robison<br>
-    CMPS 165: Data programming for Visualization<br>
-    Fall 2016<br>
-    Instructor: Suresh Lodha<br>
-    Sources: <a href="https://www.arcgis.com/home/item.html?id=16da193d9bcd4ae0b74febe39730658a">Africa SHP file</a> <a href="https://africaopendata.org/dataset/avert-hiv-and-aids-statistics">HIV dataset</a> 
-    <a href="http://bl.ocks.org/mbostock/1087001">ToolTip Help</a> <a href="https://bl.ocks.org/john-guerra/43c7656821069d00dcbc">GeoJSON Help</a>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xs-12" >
+        <br>
+        Created by Tal Robison for CMPS 165: Data programming for Visualization, Fall 2016<br>
+        Instructor: Suresh Lodha
+      </div>
+    </div>
+    <div class="row text-muted">
+      <div class="col-xs-4" >
+        Files:<br><li><a href="https://github.com/talmrobinson/HIVSSA2011/blob/master/index.html">index.html</a></li><li><a href="https://github.com/talmrobinson/HIVSSA2011/blob/master/hiv.json">hiv.json</a></li>
+      </div>
+      <div class="col-xs-4" >
+        Data Sources:<br><li><a href="https://www.arcgis.com/home/item.html?id=16da193d9bcd4ae0b74febe39730658a">Africa SHP file</a></li><li><a href="https://africaopendata.org/dataset/avert-hiv-and-aids-statistics">HIV dataset</a></li>
+    </div>
+      <div class="col-xs-4" >
+        Code Sources:<br><li><a href="http://bl.ocks.org/mbostock/1087001">ToolTip Help</a></li><li><a href="https://bl.ocks.org/john-guerra/43c7656821069d00dcbc">GeoJSON Help</a></li>
+    </div>
   </div>
-<script src="https://d3js.org/d3.v3.min.js"></script>
-<script src="https://d3js.org/topojson.v1.min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -157,7 +164,7 @@ g.call(xAxis).append("text")
 var tooltip = d3.select('body').append('div')
             .attr('class', 'hidden tooltip');
   
-d3.json("https://raw.githubusercontent.com/talmrobinson/HIVSSA2011/master/hiv.json", function(error, hiv) {
+d3.json("hiv.json", function(error, hiv) {
   if (error) throw error;
   console.log(hiv);
 
